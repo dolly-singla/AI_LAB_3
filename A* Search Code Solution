@@ -1,0 +1,74 @@
+import heapq
+
+
+class AStar:
+    def __init__(self, board, source,dest):
+        self.board = board
+        self.source = source
+        self.dest = dest
+        self.rows = len(board)
+        self.cols = len(board[0])
+
+    def heuristic(self, a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+    def get_next_move(self, node):
+        possible_moves = [(0,1),(1,0),(0,-1),(-1,0),(-1,1),(1,1),(1,-1),(-1,-1)]  
+        next = []
+        for dr, dc in possible_moves:
+            r, c = node[0] + dr, node[1] + dc
+            if 0 <= r < self.rows and 0 <= c < self.cols and self.board[r][c] != -1:
+                next.append((r, c))
+        return next
+
+    def search(self):
+        open = []
+        heapq.heappush(open, (0 + self.heuristic(self.source, self.dest), 0, self.source, [self.source]))
+
+        closed = set()
+
+        while open:
+            estimated_cost, actual_cost, current, path = heapq.heappop(open)
+
+            if current in closed:
+                continue
+            closed.add(current)
+
+            if current == self.dest:
+                return path, actual_cost
+
+            for next in self.get_next_move(current):
+                new_cost = actual_cost + self.board[next[0]][next[1]]
+                estimation = new_cost + self.heuristic(next, self.dest)
+                heapq.heappush(open, (estimation, new_cost, next, path + [next]))
+
+        return None, float("inf")
+
+
+
+# board = [
+#     [1, 1, 1, 1, 1],
+#     [1, -1, -1, -1, 1],
+#     [1,  1,  1, -1, 1],
+#     [1, -1,  1,  1, 1],
+#     [1,  1,  1, -1, 1],
+# ]
+
+board = [
+    [1, 1, 1, 1 ],
+    [1, -1, -1, -1],
+    [1,  1,  1, -1],
+    [1, -1,  1,  1],
+    [1,  1,  -1, 1],
+]
+
+# source= (0, 0)   
+# dest = (4, 4)    
+
+source= (0, 3)   
+dest = (3, 3) 
+
+a_star_search = AStar(board, source, dest)
+path, cost = a_star_search.search()
+
+print("Optimal Path:", path)
